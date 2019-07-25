@@ -17,3 +17,4 @@ cmd examples:
 * git remote
 * git push -u origin master
 * git push 
+* git pull 
