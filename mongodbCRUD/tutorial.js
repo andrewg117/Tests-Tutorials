@@ -1,6 +1,8 @@
 const { MongoClient } = require('mongodb');
 const pass = require('./creds');
 
+//#region Commands
+
 const listDatabases = async (client) => {
   const dbList = await client.db().admin().listDatabases();
 
@@ -117,12 +119,51 @@ const deleteListingsBeforeDate = async (client, date) => {
   console.log(`${result.deletedCount} deleted`);
 }
 
+// get count of objects 
+const countDocumentsByPropertyType = async (collection, type) => {
+  const result = await collection.countDocuments( { property_type: type } );
+
+  if(result > 0){
+    console.log(`${result} matched property_type: ${type}`);
+  } else {
+    console.log("Non Found");
+  }
+}
+
+
+// get distinct values
+const distinctByField = async (collection, field, query) => {
+  const distinctValues = await collection.distinct(field, query);
+
+  if(distinctValues.length > 0){
+    console.log(`${distinctValues.length} distinct ${field}:`)
+    console.log(distinctValues);
+  } else {
+    console.log("Non Found");
+  }
+}
+
+//#endregion
+
 // connects to MongoDB Atlas DB and runs CRUD functions
 const main = async () => {
   const uri = `mongodb+srv://andrew:${pass}@cluster0.pbvmw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
   const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+
   try {
     await client.connect();
+
+    const database = client.db("sample_airbnb");
+    const listingsAndReviews = database.collection("listingsAndReviews");
+
+    // await countDocumentsByPropertyType(listingsAndReviews, "House");
+
+    // await distinctByField(listingsAndReviews, "property_type", { bedrooms: { $lt: 2 }});
+
+    // get collection stats
+    // const result = await listingsAndReviews.stats(1024);
+    // console.log(result);
 
     // await listDatabases(client); 
 
@@ -189,7 +230,9 @@ const main = async () => {
 
     // await deleteListingByName(client, "Cozy Cottage");
 
-    await deleteListingsBeforeDate(client, new Date("2019-02-15"));
+    // await deleteListingsBeforeDate(client, new Date("2019-02-15"));
+
+
 
   } catch (error) {
     console.log(error);
