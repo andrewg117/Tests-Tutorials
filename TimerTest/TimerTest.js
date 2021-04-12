@@ -2,11 +2,21 @@
 $(document).ready(() => {
   let intervalIndex = 0;
   let timeoutIndex = 0;
-  const count = 2;
+  let currentTime;
+  let nextTime;
+  let isStarted = false;
+  const count = 200;
   const calc = (60 / count) * 1000;
 
   const intervalTimer = () => {
     let timer = setInterval(() => {
+      // if(!currentTime) {
+      //   currentTime = new Date().getTime();
+      // }
+
+      // let diff = (new Date().getTime() - currentTime) % calc; 
+      // console.log(`${diff} ms`);
+
       if(intervalIndex < count) {
         intervalIndex++;
         // console.log(intervalIndex);
@@ -19,27 +29,49 @@ $(document).ready(() => {
   }
 
   const timeoutTimer = () => {
-      timeoutIndex++;
-      if(timeoutIndex < count) {
-        // console.log(timeoutIndex);
-        setTimeout(timeoutTimer, calc);
-      } else {
-        let endStamp = new Date();
-        console.log(`timeoutTimer End: ${endStamp}`);
-      }
+      if(isStarted) {
+        timeoutIndex++;
+
+        if(!currentTime) {
+          currentTime = new Date().getTime();
+          nextTime = currentTime;
+        }
+        nextTime += calc;
+
+        let diff = (new Date().getTime() - currentTime) % calc; 
+        console.log(`${timeoutIndex}: ${diff} ms`);
+
+        if(timeoutIndex < count) {
+          // console.log(timeoutIndex);
+          setTimeout(timeoutTimer, nextTime - new Date().getTime());
+        } else {
+          let endStamp = new Date();
+          console.log(`timeoutTimer End: ${endStamp}`);
+          isStarted = !isStarted;
+          clearTimeout(timeoutTimer);
+        }
+    } else {
+      clearTimeout(timeoutTimer);
+    }
   }
 
   $('#btn1').click(() => {
     intervalIndex = 0;
+    start = 0;
     let startStamp = new Date();
     console.log(`intervalTimer Start: ${startStamp}`);
     intervalTimer();
   });
 
   $('#btn2').click(() => {
-    timeoutIndex = 0;
+    if(timeoutIndex == count) {
+      timeoutIndex = 0;
+    }
+    currentTime = 0;
+    nextTime = 0;
+    isStarted = !isStarted;
     let startStamp = new Date();
-    setTimeout(timeoutTimer, calc);
+    timeoutTimer();
     console.log(`timeoutTimer Start: ${startStamp}`);
   });
 });
