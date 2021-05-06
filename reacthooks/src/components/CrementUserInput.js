@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useValue, useChangeValue } from './InDeCrementContext';
 
-const InDeCrement = ({ initialValue, changeAmount }) => {
-  const [value, changeValue] = useState(() => {
-    return initialValue;
-  });
+const CrementUserInput = ({ changeAmount, initialValue }) => {
+  const value = useValue();
+  const changeValue = useChangeValue();
+
   const [valueColor, changeColor] = useState(() => {
     return checkValueColor(initialValue);
   });
@@ -16,7 +17,7 @@ const InDeCrement = ({ initialValue, changeAmount }) => {
     }
   }, [value])
 
-  return (
+  return(
     <div>
       <ValueDisplay
         value={value}
@@ -35,7 +36,7 @@ const InDeCrement = ({ initialValue, changeAmount }) => {
         initialValue={initialValue}
       />
     </div>
-  );
+  )
 }
 
 const IncrementButton = ({ changeValue, changeAmount }) => {
@@ -95,4 +96,4 @@ const checkValueColor = (value) => {
   return value < 0 ? 'red' : 'black';
 }
 
-export default InDeCrement;
+export default CrementUserInput;
