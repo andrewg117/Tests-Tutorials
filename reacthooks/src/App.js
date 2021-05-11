@@ -3,6 +3,7 @@ import './App.css';
 // import InDeCrementContext from './components/InDeCrementContext';
 // import CrementUserInput from './components/CrementUserInput';
 import InDeCrementReducer from './components/InDeCrementReducer';
+// import RefTesting from './components/RefTesting';
 
 const randNum = (min, max) => {
   let num = Math.round(Math.random() * (max - (min)) + (min));
@@ -18,6 +19,7 @@ function App() {
           <CrementUserInput initialValue={0} changeAmount={1} />
         </InDeCrementContext> */}
         <InDeCrementReducer initialValue={randNum(0, 0)} changeAmount={1} />
+        {/* <RefTesting /> */}
       </header>
     </div>
   );
