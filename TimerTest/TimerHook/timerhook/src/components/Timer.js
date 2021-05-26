@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 function Timer() {
-  const [isStarted, toggleStart] = useState(false);
+  const [isStarted, toggleStart] = useState(() => false);
   const [count, changeCount] = useState(() => {
     return 0;
   });
@@ -14,54 +14,53 @@ function Timer() {
 
   const timerRef = useRef(0);
 
-  const maxCount = 100;
+  const maxCount = 500;
   const calc = (60 / maxCount) * 1000;
 
-  const nextCount = () => {
-    changeCount(state => state + 1);
+  const nextCount = (next) => {
+    changeCount(state => state + next);
   }
 
-  const timeoutTimer = () => {
+  const timeoutTimer = useCallback(() => {
     if (isStarted) {
-      nextCount();
-
       if (!currentTime) {
         changeCurrent(new Date().getTime());
         changeNext(new Date().getTime());
       }
       changeNext(nextTime + calc);
 
-      // let diff = (new Date().getTime() - currentTime) % calc;
-      // console.log(`${count}: ${diff} ms`);
+      let next = count + 1;
 
-      if (count < maxCount) {
+      if (next < maxCount) {
+
+        nextCount(1);
         timerRef.current = setTimeout(() => {
           timeoutTimer();
         }, nextTime - new Date().getTime());
       }
-    } else {
-      pauseTimer();
-    }
-  }
+    } 
+
+  }, [calc, count, currentTime, isStarted, nextTime]);
 
   const startTimer = () => {
+    toggleStart(true);
     clearTimeout(timerRef.current);
     let startStamp = new Date();
-    console.log(`intervalTimer Start: ${startStamp}`);
-    toggleStart(true);
+    console.log(`timeoutTimer Start: ${startStamp}`);
   }
 
   const pauseTimer = () => {
-    changeCurrent(0);
-    changeNext(0);
     toggleStart(false);
     clearTimeout(timerRef.current);
     timerRef.current = 0;
+    changeCurrent(0);
+    changeNext(0);
   }
 
   const resetTimer = () => {
     pauseTimer();
-    changeCount(0);
+    let resetCount = setTimeout(() => changeCount(0), 300);
+    return () => clearTimeout(resetCount);
   }
 
   useEffect(() => {
@@ -70,29 +69,22 @@ function Timer() {
         timeoutTimer();
       }, calc);
     } else {
-      clearTimeout(timerRef.current);
-      timerRef.current = 0;
-      toggleStart(false);
-      changeCurrent(0);
-      changeNext(0);
+      pauseTimer();
       let endStamp = new Date();
       console.log(`timeoutTimer End: ${endStamp}`);
     }
 
     return () => {
-      changeCurrent(0);
-      changeNext(0);
       clearTimeout(timerRef.current);
       timerRef.current = 0;
     }
-  }, [isStarted, count]);
+  }, [isStarted, count, calc, timeoutTimer]);
 
   return (
     <div>
       <h1>{isStarted.toString()}</h1>
       <h1>{count}</h1>
-      <button onClick={startTimer}>Start</button>
-      <button onClick={pauseTimer}>Pause</button>
+      <button onClick={isStarted ? pauseTimer : startTimer}>{isStarted ? 'Pause' : 'Start'}</button>
       <button onClick={resetTimer}>Reset</button>
     </div>
   )
